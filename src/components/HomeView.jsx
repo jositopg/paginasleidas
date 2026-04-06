@@ -18,7 +18,7 @@ export default function HomeView({ books, onAdd, onSelect }) {
     <div className="min-h-screen bg-white max-w-lg mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-10 pb-6">
-        <h1 className="text-xl font-semibold text-black">Páginas</h1>
+        <h1 className="text-xl font-semibold text-black">Páginas Leídas</h1>
         <button
           onClick={onAdd}
           className="bg-black text-white text-sm px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors"
