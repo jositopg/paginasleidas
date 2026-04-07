@@ -2,7 +2,9 @@ const KEY = 'paginas_books'
 
 export function getBooks() {
   try {
-    return JSON.parse(localStorage.getItem(KEY)) || []
+    const books = JSON.parse(localStorage.getItem(KEY)) || []
+    // Normalize old books that were saved before status field existed
+    return books.map(b => b.status ? b : { ...b, status: 'read' })
   } catch {
     return []
   }
