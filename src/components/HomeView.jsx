@@ -24,6 +24,9 @@ export default function HomeView({ books, onAdd, onSelect }) {
     : readBooks.filter(b => new Date(b.dateRead).getFullYear() === selectedYear)
 
   const stats = computeStats(books, selectedYear)
+  const allTimePages = books
+    .filter(b => b.status === 'read' && b.pages)
+    .reduce((s, b) => s + b.pages, 0)
 
   return (
     <div className="min-h-screen bg-white max-w-lg mx-auto">
@@ -39,6 +42,19 @@ export default function HomeView({ books, onAdd, onSelect }) {
       </div>
 
       {books.length === 0 && <EmptyState onAdd={onAdd} />}
+
+      {/* All-time pages */}
+      {allTimePages > 0 && (
+        <div className="px-5 pb-6">
+          <div className="border border-gray-100 rounded-xl px-5 py-4 flex items-baseline justify-between">
+            <div>
+              <p className="text-3xl font-semibold text-black">{allTimePages.toLocaleString('es-ES')}</p>
+              <p className="text-xs text-gray-400 mt-1">páginas leídas en total</p>
+            </div>
+            <p className="text-xs text-gray-300">{books.filter(b => b.status === 'read').length} libros</p>
+          </div>
+        </div>
+      )}
 
       {/* Leyendo */}
       {readingBooks.length > 0 && (
