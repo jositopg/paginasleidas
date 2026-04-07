@@ -36,6 +36,7 @@ export default function AddBookView({ onBack, onSaved, editBook = null }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
+  const [searchError, setSearchError] = useState(false)
   const [selected, setSelected] = useState(isEdit ? editBook : null)
   const [form, setForm] = useState(isEdit ? {
     status: editBook.status || 'read',
@@ -64,11 +65,13 @@ export default function AddBookView({ onBack, onSaved, editBook = null }) {
     if (!query.trim()) return
     setLoading(true)
     setResults([])
+    setSearchError(false)
     try {
       const items = await searchBooks(query)
       setResults(items)
+      if (items.length === 0) setSearchError(true)
     } catch {
-      setResults([])
+      setSearchError(true)
     } finally {
       setLoading(false)
     }
@@ -160,6 +163,13 @@ export default function AddBookView({ onBack, onSaved, editBook = null }) {
             </button>
           </div>
         </form>
+      )}
+
+      {/* Search error */}
+      {searchError && !loading && (
+        <p className="text-sm text-gray-400 mb-4">
+          No se encontraron resultados o hubo un error. Prueba con otro título.
+        </p>
       )}
 
       {/* Search results */}
