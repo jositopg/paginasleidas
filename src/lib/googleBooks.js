@@ -13,6 +13,7 @@ export async function searchBooks(query) {
       cover: info.imageLinks?.thumbnail?.replace('http:', 'https:') || null,
       pages: info.pageCount || null,
       language: info.language || null,
+      categories: info.categories || [],
     }
   })
 }

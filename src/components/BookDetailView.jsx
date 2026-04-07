@@ -6,13 +6,19 @@ const LANG_LABELS = {
   it: 'Italiano', pt: 'Portugués', ca: 'Catalán', other: 'Otro',
 }
 
+const STATUS_LABELS = {
+  want: 'Quiero leer',
+  reading: 'Leyendo',
+  read: 'Leído',
+}
+
 function formatDate(str) {
   if (!str) return ''
   const d = new Date(str + 'T00:00:00')
   return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-export default function BookDetailView({ book, onBack, onDeleted }) {
+export default function BookDetailView({ book, onBack, onDeleted, onEdit }) {
   const [confirming, setConfirming] = useState(false)
 
   function handleDelete() {
@@ -23,9 +29,14 @@ export default function BookDetailView({ book, onBack, onDeleted }) {
 
   return (
     <div className="min-h-screen bg-white px-5 py-8 max-w-lg mx-auto">
-      <button onClick={onBack} className="text-sm text-gray-400 hover:text-black mb-8 flex items-center gap-1 transition-colors">
-        ← Volver
-      </button>
+      <div className="flex items-center justify-between mb-8">
+        <button onClick={onBack} className="text-sm text-gray-400 hover:text-black flex items-center gap-1 transition-colors">
+          ← Volver
+        </button>
+        <button onClick={onEdit} className="text-sm text-gray-400 hover:text-black transition-colors">
+          Editar
+        </button>
+      </div>
 
       {/* Cover + title */}
       <div className="flex gap-5 mb-8">
@@ -46,12 +57,10 @@ export default function BookDetailView({ book, onBack, onDeleted }) {
 
       {/* Meta */}
       <div className="space-y-3 border-t border-gray-100 pt-6 mb-6">
-        {book.dateRead && (
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-400">Leído</span>
-            <span className="text-black">{formatDate(book.dateRead)}</span>
-          </div>
-        )}
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-400">Estado</span>
+          <span className="text-black">{STATUS_LABELS[book.status] || '—'}</span>
+        </div>
         {book.genre && (
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">Género</span>
@@ -68,6 +77,24 @@ export default function BookDetailView({ book, onBack, onDeleted }) {
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">Idioma</span>
             <span className="text-black">{LANG_LABELS[book.language] || book.language}</span>
+          </div>
+        )}
+        {book.dateStarted && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-400">Empezado</span>
+            <span className="text-black">{formatDate(book.dateStarted)}</span>
+          </div>
+        )}
+        {book.dateRead && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-400">Terminado</span>
+            <span className="text-black">{formatDate(book.dateRead)}</span>
+          </div>
+        )}
+        {book.daysToRead > 0 && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-400">Tiempo de lectura</span>
+            <span className="text-black">{book.daysToRead} días</span>
           </div>
         )}
       </div>
