@@ -1,22 +1,24 @@
+const LANG_MAP = { eng: 'en', spa: 'es', fre: 'fr', ger: 'de', ita: 'it', por: 'pt', cat: 'ca' }
+
 export async function searchBooks(query) {
   if (!query.trim()) return []
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=12`
+  const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=12&fields=key,title,author_name,cover_i,number_of_pages_median,language,subject`
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 8000)
+  const timeout = setTimeout(() => controller.abort(), 10000)
   try {
     const res = await fetch(url, { signal: controller.signal })
     if (!res.ok) throw new Error(`Error ${res.status}`)
     const data = await res.json()
-    return (data.items || []).map(item => {
-      const info = item.volumeInfo
+    return (data.docs || []).map(item => {
+      const lang = item.language?.[0]
       return {
-        googleId: item.id,
-        title: info.title || 'Sin título',
-        author: (info.authors || []).join(', ') || 'Autor desconocido',
-        cover: info.imageLinks?.thumbnail?.replace('http:', 'https:') || null,
-        pages: info.pageCount || null,
-        language: info.language || null,
-        categories: info.categories || [],
+        googleId: item.key,
+        title: item.title || 'Sin título',
+        author: (item.author_name || []).join(', ') || 'Autor desconocido',
+        cover: item.cover_i ? `https://covers.openlibrary.org/b/id/${item.cover_i}-M.jpg` : null,
+        pages: item.number_of_pages_median || null,
+        language: LANG_MAP[lang] || (lang ? lang.slice(0, 2) : null),
+        categories: item.subject?.slice(0, 3) || [],
       }
     })
   } finally {
