@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { searchBooks } from '../lib/googleBooks'
 import { saveBook, updateBook } from '../lib/storage'
 import { GENRES, mapGoogleCategory } from '../lib/genres'
@@ -38,6 +38,27 @@ export default function AddBookView({ onBack, onSaved, editBook = null }) {
   const [loading, setLoading] = useState(false)
   const [searchError, setSearchError] = useState(false)
   const [selected, setSelected] = useState(isEdit ? editBook : null)
+  const debounceRef = useRef(null)
+
+  useEffect(() => {
+    if (selected || isEdit) return
+    if (!query.trim()) { setResults([]); setLoading(false); return }
+    setLoading(true)
+    setSearchError(false)
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const items = await searchBooks(query)
+        setResults(items)
+        if (items.length === 0) setSearchError(true)
+      } catch {
+        setSearchError(true)
+      } finally {
+        setLoading(false)
+      }
+    }, 400)
+    return () => clearTimeout(debounceRef.current)
+  }, [query, selected, isEdit])
   const [form, setForm] = useState(isEdit ? {
     status: editBook.status || 'read',
     rating: editBook.rating || 0,
@@ -59,23 +80,6 @@ export default function AddBookView({ onBack, onSaved, editBook = null }) {
     pages: '',
     notes: '',
   })
-
-  async function handleSearch(e) {
-    e.preventDefault()
-    if (!query.trim()) return
-    setLoading(true)
-    setResults([])
-    setSearchError(false)
-    try {
-      const items = await searchBooks(query)
-      setResults(items)
-      if (items.length === 0) setSearchError(true)
-    } catch {
-      setSearchError(true)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   function selectBook(book) {
     setSelected(book)
@@ -109,7 +113,7 @@ export default function AddBookView({ onBack, onSaved, editBook = null }) {
 
     const book = {
       ...(isEdit ? { id: editBook.id } : { id: crypto.randomUUID() }),
-      googleId: selected.googleId,
+      googleId: selected.id || selected.googleId,
       title: selected.title,
       author: selected.author,
       cover: selected.cover,
@@ -146,23 +150,19 @@ export default function AddBookView({ onBack, onSaved, editBook = null }) {
 
       {/* Search (only when not editing) */}
       {!isEdit && !selected && (
-        <form onSubmit={handleSearch} className="mb-6">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Buscar por título o autor..."
-              className="flex-1 border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-black transition-colors"
-            />
-            <button
-              type="submit"
-              className="bg-black text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
-            >
-              {loading ? '...' : 'Buscar'}
-            </button>
-          </div>
-        </form>
+        <div className="mb-4 relative">
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Buscar por título o autor..."
+            autoFocus
+            className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-black transition-colors pr-10"
+          />
+          {loading && (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs">...</span>
+          )}
+        </div>
       )}
 
       {/* Search error */}
