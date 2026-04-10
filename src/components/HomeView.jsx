@@ -38,7 +38,7 @@ export default function HomeView({ books, onAdd, onSelect, onSettings }) {
       <div className="px-5 pt-10 pb-8">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-black tracking-tight">Páginas</h1>
+            <h1 className="text-2xl font-bold text-black tracking-tight">Páginas leídas</h1>
             <p className="text-sm text-gray-400 mt-0.5">Tu diario de lectura</p>
           </div>
           <div className="flex items-center gap-2 mt-1">
