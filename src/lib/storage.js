@@ -25,3 +25,11 @@ export function updateBook(updated) {
   const books = getBooks().map(b => b.id === updated.id ? updated : b)
   localStorage.setItem(KEY, JSON.stringify(books))
 }
+
+export function saveAiContent(bookId, type, content) {
+  const books = getBooks().map(b => {
+    if (b.id !== bookId) return b
+    return { ...b, aiContent: { ...(b.aiContent || {}), [type]: content } }
+  })
+  localStorage.setItem(KEY, JSON.stringify(books))
+}

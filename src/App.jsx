@@ -3,6 +3,7 @@ import { getBooks } from './lib/storage'
 import HomeView from './components/HomeView'
 import AddBookView from './components/AddBookView'
 import BookDetailView from './components/BookDetailView'
+import SettingsView from './components/SettingsView'
 
 export default function App() {
   const [view, setView] = useState('home')
@@ -11,6 +12,10 @@ export default function App() {
   const [books, setBooks] = useState(() => getBooks())
 
   const refresh = useCallback(() => setBooks(getBooks()), [])
+
+  if (view === 'settings') {
+    return <SettingsView onBack={() => setView(selectedBook ? 'detail' : 'home')} />
+  }
 
   if (view === 'add') {
     return (
@@ -43,6 +48,7 @@ export default function App() {
         onBack={() => setView('home')}
         onDeleted={() => { refresh(); setView('home') }}
         onEdit={() => { setEditBook(selectedBook); setView('edit') }}
+        onSettings={() => setView('settings')}
       />
     )
   }
@@ -52,6 +58,7 @@ export default function App() {
       books={books}
       onAdd={() => setView('add')}
       onSelect={book => { setSelectedBook(book); setView('detail') }}
+      onSettings={() => setView('settings')}
     />
   )
 }

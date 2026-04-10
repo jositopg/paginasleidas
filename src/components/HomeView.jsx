@@ -12,7 +12,7 @@ function formatDate(str) {
   return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
 }
 
-export default function HomeView({ books, onAdd, onSelect }) {
+export default function HomeView({ books, onAdd, onSelect, onSettings }) {
   const years = getReadYears(books)
   const [selectedYear, setSelectedYear] = useState(years[0] ?? null)
 
@@ -33,15 +33,20 @@ export default function HomeView({ books, onAdd, onSelect }) {
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-10 pb-6">
         <h1 className="text-xl font-semibold text-black">Páginas Leídas</h1>
-        <button
-          onClick={onAdd}
-          className="bg-black text-white text-sm px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors"
-        >
-          + Añadir
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={onSettings} className="text-gray-300 hover:text-black transition-colors px-2 py-2 text-lg" title="Ajustes">
+            ⚙️
+          </button>
+          <button
+            onClick={onAdd}
+            className="bg-black text-white text-sm px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+          >
+            + Añadir
+          </button>
+        </div>
       </div>
 
-      {books.length === 0 && <EmptyState onAdd={onAdd} />}
+      {books.length === 0 && <DemoState onAdd={onAdd} />}
 
       {/* All-time pages */}
       {allTimePages > 0 && (
@@ -247,15 +252,86 @@ function MiniCard({ label, value, sub }) {
   )
 }
 
-function EmptyState({ onAdd }) {
+function DemoState({ onAdd }) {
   return (
-    <div className="flex flex-col items-center justify-center px-5 pt-24 text-center">
-      <p className="text-5xl mb-6">📚</p>
-      <p className="text-black font-medium mb-2">Sin libros todavía</p>
-      <p className="text-gray-400 text-sm mb-8">Añade el primero para empezar a ver tus estadísticas</p>
+    <div className="px-5">
+      {/* Intro */}
+      <div className="mb-6">
+        <p className="text-sm text-gray-400 leading-relaxed">Tu diario de lectura personal. Registra libros, consulta estadísticas y genera resúmenes con IA.</p>
+      </div>
+
+      {/* Demo all-time pages card */}
+      <div className="border border-gray-100 rounded-xl px-5 py-4 flex items-baseline justify-between mb-6 opacity-40">
+        <div>
+          <p className="text-3xl font-semibold text-black">12.840</p>
+          <p className="text-xs text-gray-400 mt-1">páginas leídas en total</p>
+        </div>
+        <p className="text-xs text-gray-300">34 libros</p>
+      </div>
+
+      {/* Demo stats grid */}
+      <div className="grid grid-cols-3 gap-3 mb-5 opacity-40">
+        <div className="border border-gray-100 rounded-xl p-4">
+          <p className="text-2xl font-semibold text-black">12</p>
+          <p className="text-xs text-gray-400 mt-1">Libros</p>
+        </div>
+        <div className="border border-gray-100 rounded-xl p-4">
+          <p className="text-2xl font-semibold text-black">4.210</p>
+          <p className="text-xs text-gray-400 mt-1">Páginas</p>
+        </div>
+        <div className="border border-gray-100 rounded-xl p-4">
+          <p className="text-2xl font-semibold text-black">8</p>
+          <p className="text-xs text-gray-400 mt-1">Autores</p>
+        </div>
+      </div>
+
+      {/* Demo mini cards */}
+      <div className="grid grid-cols-2 gap-3 mb-8 opacity-40">
+        <div className="border border-gray-100 rounded-xl p-4">
+          <p className="text-xs text-gray-400 mb-1">Valoración media</p>
+          <p className="text-sm font-medium text-black">4.2 ★</p>
+        </div>
+        <div className="border border-gray-100 rounded-xl p-4">
+          <p className="text-xs text-gray-400 mb-1">Tiempo medio</p>
+          <p className="text-sm font-medium text-black">18 días</p>
+          <p className="text-xs text-gray-300 mt-0.5">por libro</p>
+        </div>
+        <div className="border border-gray-100 rounded-xl p-4">
+          <p className="text-xs text-gray-400 mb-1">Autor favorito</p>
+          <p className="text-sm font-medium text-black truncate">Yuval Noah Harari</p>
+          <p className="text-xs text-gray-300 mt-0.5">3 libros</p>
+        </div>
+        <div className="border border-gray-100 rounded-xl p-4">
+          <p className="text-xs text-gray-400 mb-1">Mejor mes</p>
+          <p className="text-sm font-medium text-black">enero 2025</p>
+          <p className="text-xs text-gray-300 mt-0.5">3 libros</p>
+        </div>
+      </div>
+
+      {/* AI features preview */}
+      <div className="border border-gray-100 rounded-xl p-5 mb-8">
+        <p className="text-xs text-gray-400 uppercase tracking-wide mb-4">Funciones IA</p>
+        <div className="space-y-4">
+          <div className="flex gap-3">
+            <span className="text-lg">📝</span>
+            <div>
+              <p className="text-sm font-medium text-black">Resumen e ideas clave</p>
+              <p className="text-xs text-gray-400 mt-0.5">Genera un resumen y los aprendizajes principales de cada libro que termines.</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <span className="text-lg">🔭</span>
+            <div>
+              <p className="text-sm font-medium text-black">Briefing previo</p>
+              <p className="text-xs text-gray-400 mt-0.5">Prepárate para la lectura con contexto, estructura y qué esperar del libro.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <button
         onClick={onAdd}
-        className="bg-black text-white text-sm px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+        className="w-full bg-black text-white text-sm py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors mb-10"
       >
         Añadir primer libro
       </button>
