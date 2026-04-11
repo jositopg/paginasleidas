@@ -30,8 +30,19 @@ async function readSSE(response, onEvent) {
       if (!line.startsWith('data: ')) continue
       const data = line.slice(6).trim()
       if (data === '[DONE]') return
-      try { onEvent(JSON.parse(data)) } catch {}
+      try { onEvent(JSON.parse(data)) } catch (e) {
+        // ignore malformed chunks
+      }
     }
+  }
+}
+
+async function readErrorBody(res) {
+  try {
+    const body = await res.json()
+    return body?.error?.message || body?.message || `HTTP ${res.status}`
+  } catch {
+    return `HTTP ${res.status}`
   }
 }
 
@@ -56,7 +67,7 @@ async function stream(prompt, onChunk) {
         messages: [{ role: 'user', content: prompt }],
       }),
     })
-    if (!res.ok) throw new Error(`Anthropic error ${res.status}`)
+    if (!res.ok) throw new Error(`Anthropic: ${await readErrorBody(res)}`)
     await readSSE(res, event => {
       if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
         onChunk(event.delta.text)
@@ -77,7 +88,7 @@ async function stream(prompt, onChunk) {
         messages: [{ role: 'user', content: prompt }],
       }),
     })
-    if (!res.ok) throw new Error(`OpenAI error ${res.status}`)
+    if (!res.ok) throw new Error(`OpenAI: ${await readErrorBody(res)}`)
     await readSSE(res, event => {
       const text = event.choices?.[0]?.delta?.content
       if (text) onChunk(text)
@@ -95,11 +106,13 @@ async function stream(prompt, onChunk) {
         }),
       }
     )
-    if (!res.ok) throw new Error(`Gemini error ${res.status}`)
+    if (!res.ok) throw new Error(`Gemini: ${await readErrorBody(res)}`)
+    let received = false
     await readSSE(res, event => {
       const text = event.candidates?.[0]?.content?.parts?.[0]?.text
-      if (text) onChunk(text)
+      if (text) { received = true; onChunk(text) }
     })
+    if (!received) throw new Error('Gemini: la respuesta llegó vacía. Puede que el filtro de seguridad haya bloqueado el contenido.')
   }
 }
 

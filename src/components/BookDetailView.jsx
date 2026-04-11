@@ -19,7 +19,7 @@ function formatDate(str) {
   return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-function AiSection({ title, icon, content, loading, onGenerate, onSettings }) {
+function AiSection({ title, icon, content, error, loading, onGenerate, onSettings }) {
   const hasKey = !!getApiKey()
 
   return (
@@ -31,20 +31,24 @@ function AiSection({ title, icon, content, loading, onGenerate, onSettings }) {
             onClick={hasKey ? onGenerate : onSettings}
             className="text-xs text-gray-400 hover:text-black transition-colors"
           >
-            {!hasKey ? 'Configurar IA' : content ? 'Regenerar' : 'Generar'}
+            {!hasKey ? 'Configurar IA' : (content || error) ? 'Reintentar' : 'Generar'}
           </button>
         )}
       </div>
 
       {loading && (
-        <div className="text-xs text-gray-300 mb-2">Generando...</div>
+        <div className="text-xs text-gray-300 mb-2">Generando…</div>
       )}
 
-      {content && <MarkdownContent text={content} />}
+      {error && !loading && (
+        <p className="text-xs text-red-400 leading-relaxed">{error}</p>
+      )}
 
-      {!content && !loading && (
+      {content && !error && <MarkdownContent text={content} />}
+
+      {!content && !error && !loading && (
         <p className="text-sm text-gray-300">
-          {hasKey ? `Pulsa "Generar" para crear el ${title.toLowerCase()}.` : 'Configura tu API key de Anthropic en ajustes para usar esta función.'}
+          {hasKey ? `Pulsa "Generar" para crear el ${title.toLowerCase()}.` : 'Configura tu API key en ajustes para usar esta función.'}
         </p>
       )}
     </div>
@@ -82,10 +86,13 @@ export default function BookDetailView({ book, onBack, onDeleted, onEdit, onSett
   const [briefingLoading, setBriefingLoading] = useState(false)
   const [summaryText, setSummaryText] = useState(book.aiContent?.summary || '')
   const [briefingText, setBriefingText] = useState(book.aiContent?.briefing || '')
+  const [summaryError, setSummaryError] = useState('')
+  const [briefingError, setBriefingError] = useState('')
 
   async function handleGenerateSummary() {
     setSummaryLoading(true)
     setSummaryText('')
+    setSummaryError('')
     let full = ''
     try {
       await generateSummary(book.title, book.author, chunk => {
@@ -94,7 +101,7 @@ export default function BookDetailView({ book, onBack, onDeleted, onEdit, onSett
       })
       saveAiContent(book.id, 'summary', full)
     } catch (e) {
-      setSummaryText(e.message === 'NO_API_KEY' ? '' : 'Error al generar. Inténtalo de nuevo.')
+      if (e.message !== 'NO_API_KEY') setSummaryError(e.message)
     } finally {
       setSummaryLoading(false)
     }
@@ -103,6 +110,7 @@ export default function BookDetailView({ book, onBack, onDeleted, onEdit, onSett
   async function handleGenerateBriefing() {
     setBriefingLoading(true)
     setBriefingText('')
+    setBriefingError('')
     let full = ''
     try {
       await generateBriefing(book.title, book.author, chunk => {
@@ -111,7 +119,7 @@ export default function BookDetailView({ book, onBack, onDeleted, onEdit, onSett
       })
       saveAiContent(book.id, 'briefing', full)
     } catch (e) {
-      setBriefingText(e.message === 'NO_API_KEY' ? '' : 'Error al generar. Inténtalo de nuevo.')
+      if (e.message !== 'NO_API_KEY') setBriefingError(e.message)
     } finally {
       setBriefingLoading(false)
     }
@@ -209,6 +217,7 @@ export default function BookDetailView({ book, onBack, onDeleted, onEdit, onSett
           title="Briefing previo"
           icon="🔭"
           content={briefingText}
+          error={briefingError}
           loading={briefingLoading}
           onGenerate={handleGenerateBriefing}
           onSettings={onSettings}
@@ -221,6 +230,7 @@ export default function BookDetailView({ book, onBack, onDeleted, onEdit, onSett
           title="Resumen e ideas clave"
           icon="📝"
           content={summaryText}
+          error={summaryError}
           loading={summaryLoading}
           onGenerate={handleGenerateSummary}
           onSettings={onSettings}
