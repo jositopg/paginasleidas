@@ -13,10 +13,12 @@
 html {
   /* Prevent pull-to-refresh overscroll */
   overscroll-behavior-y: contain;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
+  overflow-x: hidden;
   background: #ffffff;
   font-family: 'Inter', system-ui, sans-serif;
   /* Safe area for notch/status bar */
