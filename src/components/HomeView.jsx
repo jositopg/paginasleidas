@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { computeStats, getReadYears, formatMonthKey } from '../lib/stats'
+import { computeStats, getReadYears, formatMonthKey, computeStreak, computeAnnualProjection } from '../lib/stats'
 
 const LANG_LABELS = {
   es: 'ES', en: 'EN', fr: 'FR', de: 'DE',
@@ -28,6 +28,8 @@ export default function HomeView({ books, onAdd, onSelect, onSettings }) {
   const allTimePages = books
     .filter(b => b.status === 'read' && b.pages)
     .reduce((s, b) => s + b.pages, 0)
+  const streak = computeStreak(books)
+  const projection = computeAnnualProjection(books)
 
   const hasNoBooks = books.length === 0
   const hasNoReadBooks = readBooks.length === 0
@@ -35,7 +37,7 @@ export default function HomeView({ books, onAdd, onSelect, onSettings }) {
   return (
     <div className="min-h-screen bg-white max-w-lg mx-auto">
       {/* Header */}
-      <div className="px-5 pt-10 pb-8">
+      <div className="px-5 pt-safe pb-8">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-black tracking-tight">Páginas leídas</h1>
@@ -209,6 +211,26 @@ export default function HomeView({ books, onAdd, onSelect, onSettings }) {
                     </div>
                   )}
 
+                  {/* Streak + projection */}
+                  {(streak > 1 || projection) && (
+                    <div className="px-5 pb-5 grid grid-cols-2 gap-3">
+                      {streak > 1 && (
+                        <MiniCard
+                          label="Racha lectora"
+                          value={`${streak} ${streak === 1 ? 'mes' : 'meses'}`}
+                          sub="seguidos leyendo 🔥"
+                        />
+                      )}
+                      {projection && (
+                        <MiniCard
+                          label="Proyección anual"
+                          value={`${projection} libros`}
+                          sub={`en ${new Date().getFullYear()} a este ritmo`}
+                        />
+                      )}
+                    </div>
+                  )}
+
                   <div className="px-5 pb-5 grid grid-cols-2 gap-3">
                     {stats.avgRating && (
                       <MiniCard label="Valoración media" value={`${stats.avgRating} ★`} />
@@ -270,7 +292,7 @@ export default function HomeView({ books, onAdd, onSelect, onSettings }) {
 
           {/* Quiero leer */}
           {wantBooks.length > 0 && (
-            <div className="px-5 pb-10">
+            <div className="px-5 pb-safe">
               <div className="border-t border-gray-100 mb-5" />
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Quiero leer</p>
               <div className="space-y-1">

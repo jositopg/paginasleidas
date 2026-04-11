@@ -6,10 +6,34 @@
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Remove tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  /* Prevent pull-to-refresh overscroll */
+  overscroll-behavior-y: contain;
 }
 
 body {
   margin: 0;
-  background: #fafafa;
+  background: #ffffff;
   font-family: 'Inter', system-ui, sans-serif;
+  /* Safe area for notch/status bar */
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Prevent iOS zoom on input focus — inputs must be >= 16px */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Safe area bottom padding utility */
+.pb-safe {
+  padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
+}
+
+/* Safe area top padding (adds on top of existing padding) */
+.pt-safe {
+  padding-top: calc(2.5rem + env(safe-area-inset-top));
 }

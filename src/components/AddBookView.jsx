@@ -139,7 +139,7 @@ export default function AddBookView({ onBack, onSaved, editBook = null }) {
   const canSave = selected && form.genre && (form.status !== 'read' || form.dateRead)
 
   return (
-    <div className="min-h-screen bg-white px-5 py-8 max-w-lg mx-auto">
+    <div className="min-h-screen bg-white px-5 max-w-lg mx-auto" style={{paddingTop: 'calc(2rem + env(safe-area-inset-top))', paddingBottom: 'max(2rem, env(safe-area-inset-bottom))'}}>
       <button onClick={onBack} className="text-sm text-gray-400 hover:text-black mb-8 flex items-center gap-1 transition-colors">
         ← Volver
       </button>

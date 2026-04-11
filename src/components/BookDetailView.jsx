@@ -132,7 +132,7 @@ export default function BookDetailView({ book, onBack, onDeleted, onEdit, onSett
   }
 
   return (
-    <div className="min-h-screen bg-white px-5 py-8 max-w-lg mx-auto">
+    <div className="min-h-screen bg-white px-5 max-w-lg mx-auto" style={{paddingTop: 'calc(2rem + env(safe-area-inset-top))', paddingBottom: 'max(2rem, env(safe-area-inset-bottom))'}}>
       <div className="flex items-center justify-between mb-8">
         <button onClick={onBack} className="text-sm text-gray-400 hover:text-black flex items-center gap-1 transition-colors">
           ← Volver

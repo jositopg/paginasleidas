@@ -1,4 +1,4 @@
-export const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+export const MONTH_NAMES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 
 export function formatMonthKey(key) {
   const [year, month] = key.split('-')
@@ -20,6 +20,47 @@ function filterByYear(books, year) {
   const read = books.filter(b => b.status === 'read' && b.dateRead)
   if (year === null) return read
   return read.filter(b => new Date(b.dateRead).getFullYear() === year)
+}
+
+// Consecutive months (back from now) with at least 1 read book
+export function computeStreak(books) {
+  const read = books.filter(b => b.status === 'read' && b.dateRead)
+  if (!read.length) return 0
+
+  const monthSet = new Set(
+    read.map(b => {
+      const d = new Date(b.dateRead)
+      return `${d.getFullYear()}-${d.getMonth()}`
+    })
+  )
+
+  const now = new Date()
+  // Start from current month; if no book this month, allow last month as start
+  let d = new Date(now.getFullYear(), now.getMonth(), 1)
+  if (!monthSet.has(`${d.getFullYear()}-${d.getMonth()}`)) {
+    d.setMonth(d.getMonth() - 1)
+  }
+
+  let streak = 0
+  while (monthSet.has(`${d.getFullYear()}-${d.getMonth()}`)) {
+    streak++
+    d.setMonth(d.getMonth() - 1)
+  }
+  return streak
+}
+
+// Projected books for full year at current pace
+export function computeAnnualProjection(books) {
+  const year = new Date().getFullYear()
+  const thisYear = books.filter(
+    b => b.status === 'read' && b.dateRead && new Date(b.dateRead).getFullYear() === year
+  )
+  if (thisYear.length < 2) return null
+
+  const now = new Date()
+  const daysPassed = Math.max(1, Math.round((now - new Date(year, 0, 1)) / 86400000))
+  const projected = Math.round((thisYear.length / daysPassed) * 365)
+  return projected > thisYear.length ? projected : null
 }
 
 export function computeStats(books, year) {
